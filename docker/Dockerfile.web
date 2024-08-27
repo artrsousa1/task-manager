@@ -1,0 +1,12 @@
+FROM node:20-alpine
+
+WORKDIR /home/node/app
+
+RUN apk update && apk upgrade && apk add --no-cache bash
+
+COPY ../app/package.json ./
+COPY ../app/package-lock.json ./
+
+RUN npm install
+
+COPY ../app .app

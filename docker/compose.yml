@@ -1,0 +1,28 @@
+services:
+  backend:
+    container_name: express-api
+    build: 
+      context: ../
+      dockerfile: docker/Dockerfile
+    expose:
+      - 8000
+    ports:
+      - 8000:8000
+    volumes:
+      - ../api/src:/home/node/api/src
+    env_file:
+      - ../api/.env
+
+  frontend:
+    container_name: next-js
+    build: 
+      context: ../
+      dockerfile: docker/Dockerfile.web
+    command: npm run dev
+    expose:
+      - 3000
+    ports:
+      - 3000:3000
+    volumes:
+      - ../app:/home/node/app
+  
