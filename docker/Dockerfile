@@ -9,6 +9,6 @@ COPY ../api/package-lock.json ./
 
 RUN npm install
 
-COPY ../api/src .src
+COPY ../api .api
 
 CMD ["npm", "run", "dev"]
