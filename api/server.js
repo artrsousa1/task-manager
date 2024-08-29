@@ -12,8 +12,8 @@ sequelize.sync().then(() => {
     console.log(`[db] Connected to the database: ${process.env.DB_NAME}`);
 })
 
+app.use(express.json());
 app.use('/api',router);
-app.use(express.json);
 
 app.listen(port, () => {
     console.log(`[server] Server is running at http://localhost:${port}`);
