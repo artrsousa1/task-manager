@@ -8,4 +8,9 @@ const UserCreateInput = Joi.object({
     password: Joi.string().min(6).required()
 });
 
-module.exports = UserCreateInput;
+const UserLoginInput = Joi.object({
+    username: Joi.string().alphanum().min(3).required(),
+    password: Joi.string().min(6).required()
+});
+
+module.exports = { UserCreateInput, UserLoginInput };
