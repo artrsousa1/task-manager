@@ -1,12 +1,12 @@
 const UserModel = require('../models/Users');
 const bcrypt = require('bcrypt');
-const UserCreateInput = require('../validators/userValidator');
+const { UserCreateInput, UserLoginInput } = require('../validators/userValidator');
 const { Op } = require('sequelize');
 
-const createUser = async (req,res) => {
+const createUser = async (req, res) => {
     try {
         const { error, value } = UserCreateInput.validate(req.body);
-        if(error) {
+        if (error) {
             return res.status(400).send({
                 message: error.message,
                 body: req.body
@@ -18,14 +18,13 @@ const createUser = async (req,res) => {
                 [Op.or]: [{ username }, { email }]
             }
         });
-
-        if(user) {
+        if (user) {
             return res.status(400).send({
                 message: 'User already exists.'
             });
         }
-        
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
         await UserModel.create({
             firstName,
             lastName,
@@ -34,7 +33,7 @@ const createUser = async (req,res) => {
             password: hashedPassword
         });
         res.status(201).send({
-            message: 'User created successfully.',
+            message: 'User created successfully.'
         });
     } catch (error) {
         console.log(error);
@@ -44,4 +43,43 @@ const createUser = async (req,res) => {
     }
 };
 
-module.exports = { createUser }
+const loginUser = async (req,res) => {
+    try {
+        const { error, value } = UserLoginInput.validate(req.body);
+        if(error) {
+            return res.status(400).send({
+                message: error.message,
+                data: req.body
+            });
+        }
+
+        const { username, password } = value;
+        const user = await UserModel.findOne({
+            where: { username: username }
+        })
+
+        if(!user) {
+            return res.status(400).send({
+                message: 'Username or password is incorrect.'
+            })
+        }
+
+        bcrypt.compare(password, user.password).then((result) => {
+            if(!result) {
+                return res.status(400).send({
+                    message: 'Username or password is incorrect.'
+                })
+            }
+            res.status(200).send({
+                message: 'Login successful.'
+            })
+        })
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({
+            message: 'Internal server error.'
+        });
+    }
+}
+
+module.exports = { createUser, loginUser };
