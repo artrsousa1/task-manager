@@ -4,7 +4,8 @@ const taskEnum = {
     DELETED: 'Task deleted successfully.',
     NOT_FOUND: 'Task not found.',
     BAD_REQUEST: 'Title field is required.',
-    INTERNAL_SERVER_ERROR: 'Internal server error.'
+    INTERNAL_SERVER_ERROR: 'Internal server error.',
+    FORBIDDEN: 'Unauthorized access.'
 }
 
 module.exports = taskEnum;
