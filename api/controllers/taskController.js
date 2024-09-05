@@ -1,9 +1,12 @@
-const TaskModel = require('../models/Task');
+const { Task } = require('../models');
 const TaskEnum = require('../enums/taskEnum');
+const { where } = require('sequelize');
 
 const getTasks = async (req,res) => {
     try {
-        const tasks = await TaskModel.findAll();
+        const tasks = await Task.findAll({
+            where: { UserId: req.user.id }
+        });
         res.status(200).send({
             message: 'Tasks retrieved successfully',
             data: tasks
@@ -19,18 +22,23 @@ const getTasks = async (req,res) => {
 
 const createTask = async (req,res) => {
     try {
-        const newTask = req.body;
+        const { title, status, description } = req.body;
+        const userId = req.user.id;
 
-        if(!newTask.title) {
+        if(!title) {
             res.status(400).send({
                 message: TaskEnum.BAD_REQUEST,
             });
         }
-
-        await TaskModel.create(newTask);
+        await Task.create({
+            title,
+            status,
+            description,
+            UserId: userId
+        });
         res.status(201).send({
             message: TaskEnum.CREATED,
-            data: newTask
+            data: { title, status, description }
         });
     } catch (error) {
         console.log(error);
@@ -46,10 +54,16 @@ const updateTask = async (req,res) => {
         const taskId = req.params.id;
         const updatedTask = req.body;
 
-        const task = await TaskModel.findByPk(taskId);
+        const task = await Task.findByPk(taskId);
         if(!task) {
             res.status(404).send({
                 message: TaskEnum.NOT_FOUND,
+            });
+        }
+
+        if(task.UserId !== req.user.id) {
+            res.status(403).send({
+                message: TaskEnum.FORBIDDEN,
             });
         }
 
@@ -71,11 +85,17 @@ const updateTask = async (req,res) => {
 const deleteTask = async (req,res) => {
     try {
         const taskId = req.params.id;
-        const task = await TaskModel.findByPk(taskId);
+        const task = await Task.findByPk(taskId);
         
         if(!task) {
             res.status(404).send({
                 message: TaskEnum.NOT_FOUND,
+            });
+        }
+
+        if(task.UserId !== req.user.id) {
+            res.status(403).send({
+                message: TaskEnum.FORBIDDEN,
             });
         }
 

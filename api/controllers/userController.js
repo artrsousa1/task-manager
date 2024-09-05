@@ -1,4 +1,4 @@
-const UserModel = require('../models/Users');
+const { User } = require('../models');
 const bcrypt = require('bcrypt');
 const { UserCreateInput } = require('../validators/userValidator');
 const { Op } = require('sequelize');
@@ -14,7 +14,7 @@ const createUser = async (req, res) => {
             });
         }
         const { firstName, lastName, username, email, password } = value;
-        const user = await UserModel.findOne({
+        const user = await User.findOne({
             where: {
                 [Op.or]: [{ username }, { email }]
             }
@@ -26,7 +26,7 @@ const createUser = async (req, res) => {
         }
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
-        await UserModel.create({
+        await User.create({
             firstName,
             lastName,
             username,
