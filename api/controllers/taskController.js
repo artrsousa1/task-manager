@@ -9,7 +9,7 @@ const getTasks = async (req,res) => {
         });
         res.status(200).send({
             message: 'Tasks retrieved successfully',
-            data: tasks
+            data: tasks,
         });
     } catch (error) {
         console.log(error);
@@ -26,11 +26,11 @@ const createTask = async (req,res) => {
         const userId = req.user.id;
 
         if(!title) {
-            res.status(400).send({
+            return res.status(400).send({
                 message: TaskEnum.BAD_REQUEST,
             });
         }
-        await Task.create({
+        const newTask = await Task.create({
             title,
             status,
             description,
@@ -38,7 +38,7 @@ const createTask = async (req,res) => {
         });
         res.status(201).send({
             message: TaskEnum.CREATED,
-            data: { title, status, description }
+            data: { id: newTask.id, title, status, description }
         });
     } catch (error) {
         console.log(error);
@@ -56,13 +56,13 @@ const updateTask = async (req,res) => {
 
         const task = await Task.findByPk(taskId);
         if(!task) {
-            res.status(404).send({
+            return res.status(404).send({
                 message: TaskEnum.NOT_FOUND,
             });
         }
 
         if(task.UserId !== req.user.id) {
-            res.status(403).send({
+            return res.status(403).send({
                 message: TaskEnum.FORBIDDEN,
             });
         }
@@ -88,13 +88,13 @@ const deleteTask = async (req,res) => {
         const task = await Task.findByPk(taskId);
         
         if(!task) {
-            res.status(404).send({
+            return res.status(404).send({
                 message: TaskEnum.NOT_FOUND,
             });
         }
 
         if(task.UserId !== req.user.id) {
-            res.status(403).send({
+            return res.status(403).send({
                 message: TaskEnum.FORBIDDEN,
             });
         }
