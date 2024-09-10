@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { Outfit } from "next/font/google"
+import UserProvider from "@/contexts/UserContext";
 import "./globals.css";
+import { Toaster } from "react-hot-toast";
 
-const outfit = Outfit({ subsets: ["latin"]});
+const outfit = Outfit({ subsets: ["latin"] });
 //const montserrat = Montserrat({ weight: ["400", "500", "600", "700"], subsets: ["latin"] });
 // const poppins = Poppins( { weight: ["400", "500", "600", "700"] , subsets: ["latin"] });
 
@@ -18,10 +20,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={outfit.className}
-      >
-        {children}
+      <body className={outfit.className}>
+        <Toaster position="top-center"/>
+        <UserProvider>
+          {children}
+        </UserProvider>
       </body>
     </html>
   );
