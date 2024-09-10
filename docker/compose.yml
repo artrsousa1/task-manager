@@ -1,28 +1,14 @@
 services:
-  backend:
-    container_name: express-api
-    build: 
-      context: ../
-      dockerfile: docker/Dockerfile
-    expose:
-      - 8000
-    ports:
-      - 8000:8000
-    volumes:
-      - ../api/src:/home/node/api/src
+  db:
+    image: mysql:5.7
+    container_name: mysql
+    command: --wait_timeout=28800 --interactive_timeout=28800 --max_allowed_packet=64M
     env_file:
       - ../api/.env
-
-  frontend:
-    container_name: next-js
-    build: 
-      context: ../
-      dockerfile: docker/Dockerfile.web
-    command: npm run dev
-    expose:
-      - 3000
     ports:
-      - 3000:3000
+      - "3306:3306"
     volumes:
-      - ../app:/home/node/app
-  
+      - ./mysql:/var/lib/mysql
+
+volumes:
+  db:
