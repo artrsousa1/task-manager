@@ -38,7 +38,7 @@ const loginUser = async (req,res) => {
 
         res.cookie('accessToken', token, {
             httpOnly: true,
-            sameSite: 'strict',
+            sameSite: 'lax',
             secure: 'false'
         });
         
@@ -59,4 +59,68 @@ const loginUser = async (req,res) => {
     }
 }
 
-module.exports = { loginUser };
+const auth = async (req,res) => {
+    try {
+        if(!req.headers.cookie) {
+            return res.status(401).send({
+                message: 'Unauthorized.'
+            })
+        }
+        let token;
+
+        req.headers.cookie.split(';').forEach(element => {
+           const [ key, value ] = element.trim().split('=');
+              if(key === 'accessToken') {
+                token = value
+              }
+        });
+        
+        jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async (err, user) => {
+            if(err) {
+                return res.status(403).send({
+                    message: 'Forbidden.'
+                })
+            }
+
+            const userContent = await User.findOne({
+                where: { id: user.id }
+            })
+
+            if(!userContent) {
+                return res.status(404).send({
+                    message: 'User not found.'
+                })
+            }
+
+            res.status(200).send({
+                message: 'Authorized.',
+                user: {
+                    access: token,
+                    first_name: userContent.firstName,
+                    email: userContent.email
+                }
+            })
+        })
+    } catch(error){
+        console.log(error);
+        res.status(500).send({
+            message: 'Internal server error.'
+        })
+    }
+}
+
+const logout = async (req,res) => {
+    try {
+        res.clearCookie('accessToken');
+        res.status(200).send({
+            message: 'Logout successfull.'
+        })
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({
+            message: 'Internal server error.'
+        })
+    }
+}
+
+module.exports = { loginUser, auth, logout };
